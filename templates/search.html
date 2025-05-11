@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Search Results{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Filter Results</h5>
+            </div>
+            <div class="card-body">
+                <form method="GET" action="{{ url_for('search') }}">
+                    {% if query %}
+                        <input type="hidden" name="query" value="{{ query }}">
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <label for="resource_type" class="form-label">Resource Type</label>
+                        <select class="form-select" id="resource_type" name="resource_type">
+                            <option value="">All Types</option>
+                            <option value="link" {% if request.args.get('resource_type') == 'link' %}selected{% endif %}>Links</option>
+                            <option value="pdf" {% if request.args.get('resource_type') == 'pdf' %}selected{% endif %}>PDFs</option>
+                            <option value="youtube" {% if request.args.get('resource_type') == 'youtube' %}selected{% endif %}>YouTube</option>
+                        </select>
+                    </div>
+                    
+                    {% if categories %}
+                    <div class="mb-3">
+                        <label for="category_id" class="form-label">Category</label>
+                        <select class="form-select" id="category_id" name="category_id">
+                            <option value="">All Categories</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}" {% if request.args.get('category_id')|int == category.id %}selected{% endif %}>
+                                    {{ category.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <div class="mb-4">
+            <h2>Search Results {% if query %}for "{{ query }}"{% endif %}</h2>
+            <p>Found {{ resources|length }} resource(s) matching your search.</p>
+        </div>
+        
+        {% if resources %}
+            <div class="row">
+                {% for resource in resources %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span>
+                                    {% if resource.resource_type == 'link' %}
+                                        <i class="fas fa-link text-info me-2"></i>
+                                    {% elif resource.resource_type == 'pdf' %}
+                                        <i class="fas fa-file-pdf text-danger me-2"></i>
+                                    {% elif resource.resource_type == 'youtube' %}
+                                        <i class="fab fa-youtube text-danger me-2"></i>
+                                    {% endif %}
+                                    {{ resource.resource_type|capitalize }}
+                                </span>
+                                <small class="text-muted">{{ resource.date_posted.strftime('%Y-%m-%d') }}</small>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">{{ resource.title }}</h5>
+                                <h6 class="card-subtitle mb-2 text-muted">By {{ resource.author.username }}</h6>
+                                <p class="card-text">{{ resource.description|truncate(100) }}</p>
+                            </div>
+                            <div class="card-footer">
+                                <a href="{{ url_for('resource', resource_id=resource.id) }}" class="btn btn-sm btn-outline-primary">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <p>No resources found matching your search criteria.</p>
+                <p>Try using different keywords or browse all resources on the <a href="{{ url_for('home') }}">home page</a>.</p>
+            </div>
+        {% endif %}
+        
+        <a href="{{ url_for('home') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i> Back to Home
+        </a>
+    </div>
+</div>
+{% endblock %}

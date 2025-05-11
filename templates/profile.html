@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Profile Info</h4>
+            </div>
+            <div class="card-body text-center">
+                <i class="fas fa-user-circle fa-5x mb-3 text-primary"></i>
+                <h3>{{ current_user.username }}</h3>
+                <p class="text-muted">{{ current_user.email }}
+                    {% if current_user.email_verified %}
+                        <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i> Verified</span>
+                    {% else %}
+                        <span class="badge bg-warning"><i class="fas fa-exclamation-circle me-1"></i> Unverified</span>
+                    {% endif %}
+                </p>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('new_resource') }}" class="btn btn-primary mb-2">
+                        <i class="fas fa-plus-circle me-2"></i> Share New Resource
+                    </a>
+                    <a href="{{ url_for('edit_profile') }}" class="btn btn-outline-primary mb-2">
+                        <i class="fas fa-user-edit me-2"></i> Edit Profile
+                    </a>
+                    {% if not current_user.email_verified %}
+                    <a href="{{ url_for('request_email_verification') }}" class="btn btn-outline-warning">
+                        <i class="fas fa-envelope me-2"></i> Verify Email
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Statistics</h4>
+            </div>
+            <div class="list-group list-group-flush">
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    Total Resources
+                    <span class="badge bg-primary rounded-pill">{{ resources.total }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    Links
+                    <span class="badge bg-info rounded-pill">{{ resources.items|selectattr('resource_type', 'equalto', 'link')|list|length }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    PDFs
+                    <span class="badge bg-danger rounded-pill">{{ resources|selectattr('resource_type', 'equalto', 'pdf')|list|length }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    YouTube Videos
+                    <span class="badge bg-danger rounded-pill">{{ resources|selectattr('resource_type', 'equalto', 'youtube')|list|length }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">My Resources</h4>
+            </div>
+            <div class="card-body">
+                {% if resources.items %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Type</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for resource in resources.items %}
+                                    <tr>
+                                        <td>{{ resource.title }}</td>
+                                        <td>
+                                            {% if resource.resource_type == 'link' %}
+                                                <span class="badge bg-info"><i class="fas fa-link me-1"></i> Link</span>
+                                            {% elif resource.resource_type == 'pdf' %}
+                                                <span class="badge bg-danger"><i class="fas fa-file-pdf me-1"></i> PDF</span>
+                                            {% elif resource.resource_type == 'youtube' %}
+                                                <span class="badge bg-danger"><i class="fab fa-youtube me-1"></i> YouTube</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ resource.date_posted.strftime('%Y-%m-%d') }}</td>
+                                        <td>
+                                            <a href="{{ url_for('resource', resource_id=resource.id) }}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ resource.id }}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                            
+                                            <!-- Delete Modal -->
+                                            <div class="modal fade" id="deleteModal{{ resource.id }}" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title">Delete Resource</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <p>Are you sure you want to delete the resource "{{ resource.title }}"?</p>
+                                                            <p class="text-danger"><small>This action cannot be undone.</small></p>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                            <form action="{{ url_for('delete_resource', resource_id=resource.id) }}" method="POST" class="d-inline">
+                                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <nav aria-label="Resource pagination" class="my-4">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item {% if not resources.has_prev %}disabled{% endif %}">
+                                <a class="page-link" href="{{ url_for('profile', page=resources.prev_num) if resources.has_prev else '#' }}">
+                                    Previous
+                                </a>
+                            </li>
+                            
+                            {% for page_num in resources.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                                {% if page_num %}
+                                    <li class="page-item {% if page_num == resources.page %}active{% endif %}">
+                                        <a class="page-link" href="{{ url_for('profile', page=page_num) }}">
+                                            {{ page_num }}
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            <li class="page-item {% if not resources.has_next %}disabled{% endif %}">
+                                <a class="page-link" href="{{ url_for('profile', page=resources.next_num) if resources.has_next else '#' }}">
+                                    Next
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> You haven't shared any resources yet.
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('new_resource') }}" class="btn btn-primary">
+                            <i class="fas fa-plus-circle me-2"></i> Share Your First Resource
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

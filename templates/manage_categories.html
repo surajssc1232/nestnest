@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Categories{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Add New Category</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="">
+                    <input type="hidden" name="action" value="add">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Category Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Add Category</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Actions</h4>
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="{{ url_for('categories') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-eye me-2"></i> View All Categories
+                </a>
+                <a href="{{ url_for('home') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-home me-2"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Existing Categories</h4>
+            </div>
+            <div class="card-body">
+                {% if categories %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th>Resources</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for category in categories %}
+                                    <tr>
+                                        <td>{{ category.name }}</td>
+                                        <td>{{ category.description|truncate(50) if category.description else 'No description' }}</td>
+                                        <td>{{ category.resources.count() }}</td>
+                                        <td>
+                                            <a href="{{ url_for('category', category_id=category.id) }}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ category.id }}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                            
+                                            <!-- Delete Modal -->
+                                            <div class="modal fade" id="deleteModal{{ category.id }}" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title">Delete Category</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <p>Are you sure you want to delete the category "{{ category.name }}"?</p>
+                                                            <p class="text-danger">
+                                                                <small>This will remove the category from all associated resources, but will not delete the resources themselves.</small>
+                                                            </p>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                            <form action="{{ url_for('user_manage_categories') }}" method="POST" class="d-inline">
+                                                                <input type="hidden" name="action" value="delete">
+                                                                <input type="hidden" name="category_id" value="{{ category.id }}">
+                                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> No categories have been created yet.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

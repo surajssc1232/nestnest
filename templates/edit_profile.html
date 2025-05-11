@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Edit Profile</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" value="{{ current_user.username }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ current_user.email }}" required>
+                    </div>
+                    
+                    <hr>
+                    <h4 class="mb-3">Change Password (Optional)</h4>
+                    
+                    <div class="mb-3">
+                        <label for="current_password" class="form-label">Current Password</label>
+                        <input type="password" class="form-control" id="current_password" name="current_password">
+                        <div class="form-text">Leave blank if you don't want to change your password</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="new_password" class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="new_password" name="new_password">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="confirm_password" class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password">
+                    </div>
+                    
+                    <hr>
+                    <h4 class="mb-3">Email Notification Preferences</h4>
+                    
+                    {% set preferences = current_user.notification_preferences|default('{"new_resources": true, "comments_on_resources": true, "ratings_on_resources": false}')|tojson|fromjson %}
+                    
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="new_resources" name="new_resources" value="true" {% if preferences.new_resources %}checked{% endif %}>
+                            <label class="form-check-label" for="new_resources">Notify me when new resources are shared</label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="comments_on_resources" name="comments_on_resources" value="true" {% if preferences.comments_on_resources %}checked{% endif %}>
+                            <label class="form-check-label" for="comments_on_resources">Notify me when someone comments on my resources</label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="ratings_on_resources" name="ratings_on_resources" value="true" {% if preferences.ratings_on_resources %}checked{% endif %}>
+                            <label class="form-check-label" for="ratings_on_resources">Notify me when someone rates my resources</label>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('profile') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i> Back to Profile
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Categories{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">Resource Categories</h3>
+                {% if current_user.is_authenticated and current_user.id == 1 %}
+                    <a href="{{ url_for('user_manage_categories') }}" class="btn btn-light btn-sm">
+                        <i class="fas fa-cog me-1"></i> Manage Categories
+                    </a>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if categories %}
+                    <div class="row">
+                        {% for category in categories %}
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <a href="{{ url_for('category', category_id=category.id) }}" class="text-decoration-none">
+                                                {{ category.name }}
+                                            </a>
+                                        </h5>
+                                        <p class="card-text">{{ category.description or 'No description available.' }}</p>
+                                    </div>
+                                    <div class="card-footer">
+                                        <a href="{{ url_for('category', category_id=category.id) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-folder-open me-1"></i> View Resources
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> No categories have been created yet.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
