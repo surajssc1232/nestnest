@@ -563,10 +563,25 @@ def new_resource():
         elif resource_type == 'pdf':
             file = request.files.get('file')
             if file and file.filename.endswith('.pdf'):
+                # Make sure the uploads directory exists
+                uploads_dir = os.path.join(app.config['UPLOAD_FOLDER'])
+                if not os.path.exists(uploads_dir):
+                    os.makedirs(uploads_dir)
+                
+                # Add timestamp to filename to avoid collisions
                 filename = secure_filename(file.filename)
-                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                base, ext = os.path.splitext(filename)
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                unique_filename = f"{base}_{timestamp}{ext}"
+                
+                # Save the file
+                file_path = os.path.join(uploads_dir, unique_filename)
                 file.save(file_path)
-                content = f'/static/uploads/{filename}'
+                
+                # Store the path relative to the static folder
+                # This will be something like "/static/uploads/file.pdf"
+                content = f'/static/uploads/{unique_filename}'
+                app.logger.info(f"Saved PDF file to {file_path}, stored path as {content}")
             else:
                 flash('Invalid file. Please upload a PDF.', 'danger')
                 return redirect(url_for('new_resource'))
@@ -959,15 +974,41 @@ def chatbot_init(resource_id):
         
     try:
         resource = Resource.query.get_or_404(resource_id)
+        app.logger.info(f"Initializing chatbot for resource ID {resource_id}, type: {resource.resource_type}")
         
         # Get the resource content
         content = resource.content
         if resource.resource_type == 'pdf':
-            # For PDF files, the content is the file path in the uploads directory
-            content = os.path.join(app.root_path, 'static/uploads', content)
+            # For PDF files, content should be a path like "/static/uploads/filename.pdf"
+            # We need to convert it to an absolute path
+            if content.startswith('/'):
+                file_path = os.path.join(app.root_path, content[1:])  # Remove leading slash
+            else:
+                file_path = os.path.join(app.root_path, content)
+            
+            app.logger.info(f"Processing PDF file: {file_path}")
+                
+            if not os.path.exists(file_path):
+                error_msg = f'PDF file not found at {file_path}. Please make sure the file exists.'
+                app.logger.error(error_msg)
+                return jsonify({
+                    'success': False,
+                    'error': error_msg
+                })
+            content = file_path
         
         # Get resource text based on type
+        app.logger.info(f"Extracting text from {resource.resource_type}: {content[:100]}...")
         resource_text = chatbot.get_resource_text(resource.resource_type, content)
+        
+        if resource_text.startswith("Error"):
+            app.logger.error(f"Error extracting text: {resource_text}")
+            return jsonify({
+                'success': False,
+                'error': resource_text
+            })
+        
+        app.logger.info(f"Successfully extracted text of length {len(resource_text)}")
         
         # Initialize session for this chat
         if 'chatbot_sessions' not in session:

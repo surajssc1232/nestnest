@@ -133,14 +133,58 @@ print(f"Model initialization complete. Model works: {model_works}")
 def extract_pdf_text(pdf_path):
     """Extract text from a PDF file."""
     try:
+        print(f"Attempting to read PDF from: {pdf_path}")
+        
+        if not os.path.exists(pdf_path):
+            error_msg = f"PDF file does not exist at path: {pdf_path}"
+            print(error_msg)
+            return f"Error: {error_msg}"
+            
+        if not os.path.isfile(pdf_path):
+            error_msg = f"Path exists but is not a file: {pdf_path}"
+            print(error_msg)
+            return f"Error: {error_msg}"
+            
+        if not pdf_path.lower().endswith('.pdf'):
+            error_msg = f"File does not appear to be a PDF: {pdf_path}"
+            print(error_msg)
+            return f"Error: {error_msg}"
+            
         text = ""
         with open(pdf_path, 'rb') as file:
-            reader = PyPDF2.PdfReader(file)
-            for page_num in range(len(reader.pages)):
-                text += reader.pages[page_num].extract_text() + "\n"
-        return text
+            try:
+                reader = PyPDF2.PdfReader(file)
+                
+                # Check if PDF is encrypted
+                if reader.is_encrypted:
+                    return f"Error: PDF file is encrypted and cannot be read: {pdf_path}"
+                    
+                page_count = len(reader.pages)
+                print(f"PDF has {page_count} pages")
+                
+                for page_num in range(page_count):
+                    try:
+                        page_text = reader.pages[page_num].extract_text()
+                        if page_text:
+                            text += page_text + "\n"
+                        else:
+                            print(f"Warning: No text extracted from page {page_num+1}")
+                    except Exception as page_error:
+                        print(f"Error extracting text from page {page_num+1}: {str(page_error)}")
+                
+                # If we didn't get any text but no errors occurred, the PDF might be image-based
+                if not text.strip():
+                    return "Error: Could not extract text from PDF. The file may contain scanned images rather than text."
+                    
+                return text
+            except PyPDF2.errors.PdfReadError as pdf_error:
+                error_msg = f"Invalid or corrupted PDF file: {str(pdf_error)}"
+                print(error_msg)
+                return f"Error: {error_msg}"
     except Exception as e:
-        return f"Error extracting PDF text: {str(e)}"
+        error_msg = f"Error extracting PDF text: {str(e)}"
+        print(error_msg)
+        return f"Error: {error_msg}"
 
 def extract_webpage_text(url):
     """Extract text from a webpage."""

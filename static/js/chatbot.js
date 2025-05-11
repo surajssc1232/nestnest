@@ -28,6 +28,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 <h5 class="mb-0">NestCircle AI Assistant</h5>
                 <button class="chatbot-close">&times;</button>
             </div>
+            <div class="chatbot-actions">
+                <button class="chatbot-action-btn" id="summarize-btn" title="Summarize the content">
+                    <i class="fas fa-file-alt"></i> Summarize
+                </button>
+                <button class="chatbot-action-btn" id="quiz-btn" title="Generate a quiz">
+                    <i class="fas fa-question-circle"></i> Quiz
+                </button>
+            </div>
             <div class="chatbot-messages" id="chatbot-messages">
                 <div class="chat-message bot-message">
                     Hello! I can help you understand this resource better. What would you like to know?
@@ -51,6 +59,19 @@ document.addEventListener('DOMContentLoaded', function() {
         inputField.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 sendMessage();
+            }
+        });
+        
+        // Add event listeners for the action buttons
+        document.getElementById('summarize-btn').addEventListener('click', function() {
+            if (chatSessionId) {
+                sendMessage('Please summarize the main points of this content.', true);
+            }
+        });
+
+        document.getElementById('quiz-btn').addEventListener('click', function() {
+            if (chatSessionId) {
+                sendMessage('Please generate a quiz with 5 questions based on this content.', true);
             }
         });
     }
@@ -178,10 +199,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function sendMessage() {
+    // Remove these event listeners since they're now inside createChatbotElements
+    // function sendMessage(customMessage = null) {
+    function sendMessage(customMessage = null, isAction = false) {
         const inputField = document.getElementById('chatbot-input-field');
         const messageContainer = document.getElementById('chatbot-messages');
-        const userMessage = inputField.value.trim();
+        const userMessage = customMessage || inputField.value.trim();
         
         if (!userMessage || !chatSessionId) return;
         
@@ -191,8 +214,10 @@ document.addEventListener('DOMContentLoaded', function() {
         userMessageElement.textContent = userMessage;
         messageContainer.appendChild(userMessageElement);
         
-        // Clear input field
-        inputField.value = '';
+        // Clear input field if not using custom message from action button
+        if (!customMessage || !isAction) {
+            inputField.value = '';
+        }
         
         // Show loading indicator
         const loadingMessage = document.createElement('div');
