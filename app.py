@@ -558,8 +558,10 @@ def new_resource():
         category_ids = request.form.getlist('categories')
         content = ""
         
-        if resource_type == 'link' or resource_type == 'youtube':
-            content = request.form.get('content')
+        if resource_type == 'link':
+            content = request.form.get('link_url')
+        elif resource_type == 'youtube':
+            content = request.form.get('youtube_url')
         elif resource_type == 'pdf':
             file = request.files.get('file')
             if file and file.filename.endswith('.pdf'):
@@ -586,11 +588,17 @@ def new_resource():
                 flash('Invalid file. Please upload a PDF.', 'danger')
                 return redirect(url_for('new_resource'))
         
+        if not content and resource_type != 'pdf': # PDF content is a path, can be empty if file not uploaded but then error flashed
+            flash(f'URL content for {resource_type} is missing.', 'danger')
+            # Get all categories for the form again before re-rendering
+            categories_for_form = Category.query.all()
+            return render_template('create_resource.html', categories=categories_for_form, title=title, description=description, resource_type=resource_type, category_ids=category_ids)
+
         resource = Resource(
             title=title,
             description=description,
             resource_type=resource_type,
-            content=content,
+            content=content or "", # Ensure content is not None
             author=current_user
         )
         
@@ -618,6 +626,13 @@ def resource(resource_id):
     resource = Resource.query.get_or_404(resource_id)
     user_rating = None
     is_bookmarked = False
+    
+    # Debug YouTube URLs
+    if resource.resource_type == 'youtube':
+        print(f"DEBUG - YouTube URL in DB: {resource.content}")
+        if 'youtu.be/' in resource.content:
+            video_id = resource.content.split('youtu.be/')[1].split('?')[0]
+            print(f"DEBUG - Extracted video ID: {video_id}")
     
     if current_user.is_authenticated:
         user_rating = Rating.query.filter_by(user_id=current_user.id, resource_id=resource_id).first()
@@ -1100,6 +1115,76 @@ def chatbot_chat():
             'success': False, 
             'error': f'Error processing request: {str(e)}'
         })
+
+@app.route('/edit_resource/<int:resource_id>', methods=['GET', 'POST'])
+@login_required
+def edit_resource(resource_id):
+    """Edit an existing resource."""
+    resource = Resource.query.get_or_404(resource_id)
+    
+    # Check if user is authorized to edit this resource
+    if resource.author != current_user:
+        flash('You can only edit your own resources!', 'danger')
+        return redirect(url_for('resource', resource_id=resource.id))
+    
+    # Get all categories
+    categories = Category.query.all()
+    
+    if request.method == 'POST':
+        resource.title = request.form['title']
+        resource.description = request.form['description']
+        
+        # Handle content based on resource type
+        if resource.resource_type == 'pdf':
+            # Handle file upload if a new file is provided
+            if 'file' in request.files and request.files['file'].filename:
+                try:
+                    # Delete old file if it exists
+                    if os.path.exists(resource.content):
+                        os.remove(resource.content)
+                        
+                    # Save new file
+                    pdf_file = request.files['file']
+                    if pdf_file and allowed_file(pdf_file.filename, {'pdf'}):
+                        filename = secure_filename(pdf_file.filename)
+                        today = datetime.utcnow().strftime('%Y%m%d')
+                        file_path = os.path.join(app.config['UPLOAD_FOLDER'], today, filename)
+                        
+                        # Create directory if it doesn't exist
+                        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+                        
+                        # Save file
+                        pdf_file.save(file_path)
+                        resource.content = file_path
+                    else:
+                        flash('Invalid file type. Please upload a PDF.', 'danger')
+                        return render_template('edit_resource.html', resource=resource, categories=categories)
+                except Exception as e:
+                    app.logger.error(f"Error updating PDF file: {str(e)}")
+                    flash(f'Error updating file: {str(e)}', 'danger')
+                    return render_template('edit_resource.html', resource=resource, categories=categories)
+        else:
+            # For link and youtube types, just update the content URL
+            resource.content = request.form['content']
+        
+        # Update categories
+        if 'categories' in request.form:
+            # Clear existing categories
+            resource.categories = []
+            
+            # Add selected categories
+            selected_categories = request.form.getlist('categories')
+            for cat_id in selected_categories:
+                category = Category.query.get(cat_id)
+                if category:
+                    resource.categories.append(category)
+        
+        # Save changes
+        db.session.commit()
+        flash('Resource updated successfully!', 'success')
+        return redirect(url_for('resource', resource_id=resource.id))
+    
+    return render_template('edit_resource.html', resource=resource, categories=categories)
 
 if __name__ == '__main__':
     with app.app_context():

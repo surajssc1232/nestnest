@@ -32,13 +32,22 @@
                     </div>
                     
                     <div id="link_input" class="mb-3 resource-input" style="display: none;">
-                        <label for="content" class="form-label">Resource URL</label>
-                        <input type="url" class="form-control" id="content" name="content" placeholder="https://example.com/resource">
+                        <label for="link_url" class="form-label">Resource URL</label>
+                        <input type="url" class="form-control" id="link_url" name="link_url" placeholder="https://example.com/resource">
                     </div>
                     
                     <div id="youtube_input" class="mb-3 resource-input" style="display: none;">
-                        <label for="content" class="form-label">YouTube URL</label>
-                        <input type="url" class="form-control" id="content" name="content" placeholder="https://www.youtube.com/watch?v=...">
+                        <label for="youtube_url" class="form-label">YouTube URL</label>
+                        <input type="url" class="form-control" id="youtube_url" name="youtube_url" 
+                               placeholder="https://www.youtube.com/watch?v=... or playlist URL">
+                        <div class="form-text">
+                            Supported formats:
+                            <ul class="mb-0 mt-1">
+                                <li>YouTube video: youtube.com/watch?v=... or youtu.be/...</li>
+                                <li>YouTube playlist: youtube.com/playlist?list=...</li>
+                            </ul>
+                        </div>
+                        <!-- Preview container will be added here by JavaScript -->
                     </div>
                     
                     <div id="pdf_input" class="mb-3 resource-input" style="display: none;">

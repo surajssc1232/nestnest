@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Resource{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Edit Resource</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="title" name="title" value="{{ resource.title }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required>{{ resource.description }}</textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Resource Type</label>
+                        <p class="form-control-static">
+                            {% if resource.resource_type == 'link' %}
+                                <i class="fas fa-link me-1"></i> Web Link
+                            {% elif resource.resource_type == 'pdf' %}
+                                <i class="fas fa-file-pdf me-1"></i> PDF Document
+                            {% elif resource.resource_type == 'youtube' %}
+                                <i class="fab fa-youtube me-1"></i> YouTube Video/Playlist
+                            {% endif %}
+                        </p>
+                        <p class="text-muted"><small>The resource type cannot be changed.</small></p>
+                    </div>
+                    
+                    {% if resource.resource_type == 'link' %}
+                        <div class="mb-3">
+                            <label for="content" class="form-label">Resource URL</label>
+                            <input type="url" class="form-control" id="content" name="content" value="{{ resource.content }}" placeholder="https://example.com/resource">
+                        </div>
+                    {% elif resource.resource_type == 'youtube' %}
+                        <div class="mb-3">
+                            <label for="content" class="form-label">YouTube URL</label>
+                            <input type="url" class="form-control" id="content" name="content" value="{{ resource.content }}" placeholder="https://www.youtube.com/watch?v=... or playlist URL">
+                            <div class="form-text">
+                                <p>Supported formats:</p>
+                                <ul>
+                                    <li>YouTube videos: youtube.com/watch?v=... or youtu.be/...</li>
+                                    <li>YouTube playlists: youtube.com/playlist?list=...</li>
+                                </ul>
+                            </div>
+                        </div>
+                    {% elif resource.resource_type == 'pdf' %}
+                        <div class="mb-3">
+                            <label for="content" class="form-label">Current PDF</label>
+                            <p>{{ resource.content }}</p>
+                            <label for="file" class="form-label">Upload New PDF (Optional)</label>
+                            <input class="form-control" type="file" id="file" name="file" accept=".pdf">
+                        </div>
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <label for="categories" class="form-label">Categories</label>
+                        <select class="form-select" id="categories" name="categories" multiple>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}" {% if category in resource.categories %}selected{% endif %}>{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Hold Ctrl (Cmd on Mac) to select multiple categories</div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Update Resource</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="mt-3">
+            <a href="{{ url_for('resource', resource_id=resource.id) }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i> Back to Resource
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Add preview for YouTube URLs
+    document.addEventListener('DOMContentLoaded', function() {
+        const youtubeInput = document.querySelector('#content');
+        if (youtubeInput && '{{ resource.resource_type }}' === 'youtube') {
+            // Create a container for preview
+            const previewContainer = document.createElement('div');
+            previewContainer.className = 'mt-3';
+            youtubeInput.parentNode.appendChild(previewContainer);
+            
+            // Function to update preview
+            function updatePreview() {
+                const url = youtubeInput.value.trim();
+                if (!url) {
+                    previewContainer.innerHTML = '';
+                    return;
+                }
+                
+                let videoId = null;
+                let playlistId = null;
+                
+                // Extract video ID or playlist ID from URL
+                if (url.includes('youtube.com/watch') && url.includes('v=')) {
+                    videoId = url.split('v=')[1].split('&')[0];
+                } else if (url.includes('youtu.be/')) {
+                    videoId = url.split('youtu.be/')[1].split('?')[0];
+                    console.log("Extracted video ID from short URL:", videoId);
+                }
+                
+                if (url.includes('list=')) {
+                    playlistId = url.split('list=')[1].split('&')[0];
+                }
+                
+                // Show preview based on extracted IDs
+                if (playlistId) {
+                    previewContainer.innerHTML = `
+                        <div class="alert alert-success mb-2">
+                            <i class="fas fa-check-circle me-2"></i> Valid YouTube playlist
+                        </div>
+                        <div class="ratio ratio-16x9 mb-3">
+                            <iframe src="https://www.youtube.com/embed/videoseries?list=${playlistId}" allowfullscreen></iframe>
+                        </div>
+                    `;
+                } else if (videoId) {
+                    previewContainer.innerHTML = `
+                        <div class="alert alert-success mb-2">
+                            <i class="fas fa-check-circle me-2"></i> Valid YouTube video
+                        </div>
+                        <div class="ratio ratio-16x9 mb-3">
+                            <iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>
+                        </div>
+                    `;
+                } else {
+                    previewContainer.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle me-2"></i> Invalid YouTube URL
+                        </div>
+                    `;
+                }
+            }
+            
+            // Update preview on load
+            updatePreview();
+            
+            // Update preview on input
+            youtubeInput.addEventListener('input', updatePreview);
+        }
+    });
+</script>
+{% endblock %} 

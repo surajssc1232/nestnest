@@ -23,6 +23,8 @@
     --list-group-hover: #f8f9fa;
     --input-text: #333333;
     --input-placeholder: #6c757d;
+    --code-bg: #f1f1f1;
+    --code-color: #e83e8c;
 }
 
 /* Dark theme */
@@ -44,6 +46,8 @@
     --list-group-hover: #262626;
     --input-text: #e1e1e1;
     --input-placeholder: #adb5bd;
+    --code-bg: #2d2d2d;
+    --code-color: #ff6b9a;
 }
 
 /* Apply custom font */
@@ -55,9 +59,34 @@ body {
 }
 
 /* Main container background */
-.container {
+.container, .container-fluid {
     background-color: var(--background-color);
     color: var(--text-color);
+    width: 100%;
+    max-width: 100%;
+    padding: 0 2rem;
+    margin: 0;
+}
+
+/* Use full width for larger screens */
+@media (min-width: 1200px) {
+    .container, .container-lg, .container-xl {
+        max-width: 90% !important;
+    }
+}
+
+/* Navbar container width */
+.navbar .container, .navbar .container-fluid {
+    max-width: 90% !important;
+    width: 90% !important;
+    margin: 0 auto;
+}
+
+/* Footer container */
+footer .container, footer .container-fluid {
+    max-width: 90% !important;
+    width: 90% !important;
+    margin: 0 auto;
 }
 
 /* Theme switch */
@@ -109,7 +138,7 @@ input:checked + .slider:before {
 .theme-switch-container {
     display: flex;
     align-items: center;
-    margin-left: 10px;
+    margin-left: 1.5rem;
 }
 
 .theme-switch-container i {
@@ -122,10 +151,43 @@ input:checked + .slider:before {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     background-color: var(--card-bg-color);
     border-bottom: 1px solid var(--border-color);
+    width: 100%;
+    padding: 1rem 0;
+}
+
+.navbar .container-fluid {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 2rem;
+    margin: 0;
+}
+
+.navbar-brand {
+    margin-right: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .navbar-brand, .navbar-nav .nav-link {
     color: var(--text-color);
+}
+
+.navbar-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.navbar-nav .nav-link {
+    padding: 0.5rem 1rem;
+    color: var(--text-color);
+    transition: color 0.3s ease;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
 }
 
 .navbar-nav .nav-link:hover {
@@ -140,6 +202,8 @@ input:checked + .slider:before {
     background-color: var(--card-bg-color);
     border: 1px solid var(--border-color);
     color: var(--text-color);
+    width: 100%;
+    margin-bottom: 20px;
 }
 
 .card:hover {
@@ -169,6 +233,20 @@ footer {
     background-color: var(--background-color);
     color: var(--text-color);
     border-top: 1px solid var(--border-color);
+    width: 100%;
+    padding: 2rem 0;
+}
+
+footer .container-fluid {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 2rem;
+    margin: 0;
+}
+
+/* Make sure footer content spans full width */
+footer .row {
+    width: 100%;
 }
 
 /* Resource type icons styling */
@@ -195,17 +273,30 @@ footer {
 }
 
 /* Form styling */
-.form-control, .form-select {
+.form-control, .form-select, textarea {
     background-color: var(--card-bg-color);
     color: var(--input-text);
     border-color: var(--border-color);
 }
 
-.form-control:focus {
+.form-control:focus, textarea:focus {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 0.25rem rgba(32, 178, 170, 0.25);
     background-color: var(--card-bg-color);
     color: var(--input-text);
+}
+
+/* Comment input area */
+textarea, textarea.form-control {
+    background-color: var(--card-bg-color) !important;
+    color: var(--input-text) !important;
+    border-color: var(--border-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Standard form elements */
+input, select, button, .btn {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 /* Placeholder text color */
@@ -331,9 +422,10 @@ select option {
 .featured-categories, .resource-categories {
     background-color: var(--card-bg-color);
     border-radius: 0.5rem;
-    padding: 15px;
+    padding: 20px;
     margin-bottom: 20px;
     border: 1px solid var(--border-color);
+    width: 100%;
 }
 
 .featured-categories h4, .resource-categories h4 {
@@ -344,9 +436,10 @@ select option {
 .about-section {
     background-color: var(--card-bg-color);
     border-radius: 0.5rem;
-    padding: 15px;
+    padding: 20px;
     margin-bottom: 20px;
     border: 1px solid var(--border-color);
+    width: 100%;
 }
 
 .about-section h4 {
@@ -423,6 +516,19 @@ select option {
     transform: translateY(0);
 }
 
+/* Fullscreen mode */
+.chatbot-window.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    z-index: 9999;
+}
+
 .chatbot-header {
     background-color: var(--primary-color);
     color: white;
@@ -434,12 +540,29 @@ select option {
     border-top-right-radius: 10px;
 }
 
+.chatbot-controls {
+    display: flex;
+    align-items: center;
+}
+
+.chatbot-fullscreen, 
 .chatbot-close {
     background: none;
     border: none;
     color: white;
-    font-size: 20px;
+    font-size: 18px;
     cursor: pointer;
+    margin-left: 10px;
+    transition: all 0.2s ease;
+}
+
+.chatbot-fullscreen:hover, 
+.chatbot-close:hover {
+    transform: scale(1.2);
+}
+
+.chatbot-close {
+    font-size: 24px;
 }
 
 .chatbot-messages {
@@ -449,6 +572,41 @@ select option {
     display: flex;
     flex-direction: column;
     background-color: var(--card-bg-color);
+}
+
+/* Command suggestions dropdown */
+.command-suggestions {
+    position: absolute;
+    bottom: 60px;
+    left: 10px;
+    right: 10px;
+    background-color: var(--card-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1001;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.command-suggestion {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s;
+}
+
+.command-suggestion:last-child {
+    border-bottom: none;
+}
+
+.command-suggestion:hover,
+.command-suggestion.highlighted {
+    background-color: var(--header-bg);
+}
+
+.command-suggestion strong {
+    color: var(--primary-color);
 }
 
 .chat-message {
@@ -623,4 +781,135 @@ select option {
 @keyframes typing {
     0%, 80%, 100% { transform: scale(0); }
     40% { transform: scale(1); }
+}
+
+.chat-message code {
+    font-family: 'Martian Mono', monospace;
+    background-color: var(--code-bg);
+    color: var(--code-color);
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+
+.chat-message pre {
+    background-color: var(--code-bg);
+    color: var(--text-color);
+    padding: 10px;
+    border-radius: 5px;
+    overflow-x: auto;
+    font-size: 0.9em;
+    font-family: 'Martian Mono', monospace;
+    margin: 10px 0;
+    border-left: 3px solid var(--primary-color);
+}
+
+/* About NestCircle section */
+.about-section h4 {
+    color: var(--text-color);
+    margin-bottom: 15px;
+}
+
+/* Improve overall layout spacing */
+.row {
+    width: 100%;
+    margin-right: 0;
+    margin-left: 0;
+}
+
+/* Better utilize space for main content */
+main.container, div.container {
+    padding: 0 30px;
+}
+
+/* Improve main welcome section spacing */
+.welcome-section {
+    width: 100%;
+    margin-bottom: 2rem;
+}
+
+/* Ensure all sections use full width */
+section {
+    width: 100%;
+}
+
+/* List Group Styles */
+
+/* Resource card layout */
+.resource-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Search bar in navbar */
+.navbar .search-container {
+    flex-grow: 1;
+    margin: 0 2rem;
+    max-width: 400px;
+}
+
+/* Main content spacing */
+main {
+    padding: 2rem 0;
+}
+
+.section-heading {
+    margin-bottom: 2rem;
+}
+
+/* Rating section dark mode fixes */
+[data-theme="dark"] .modal-content {
+    background-color: var(--card-bg-color);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .modal-header {
+    border-bottom-color: var(--border-color);
+}
+
+[data-theme="dark"] .modal-footer {
+    border-top-color: var(--border-color);
+}
+
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select,
+[data-theme="dark"] textarea {
+    background-color: var(--card-bg-color);
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-select:focus,
+[data-theme="dark"] textarea:focus {
+    background-color: var(--card-bg-color);
+    color: var(--text-color);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(32, 178, 170, 0.25);
+}
+
+[data-theme="dark"] .modal-title,
+[data-theme="dark"] .form-label {
+    color: var(--text-color);
+}
+
+/* Star rating in dark mode */
+[data-theme="dark"] .star-rating label {
+    color: #555;
+}
+
+[data-theme="dark"] .star-rating:hover label:hover,
+[data-theme="dark"] .star-rating:hover label:hover ~ label,
+[data-theme="dark"] .star-rating input:checked ~ label {
+    color: var(--primary-color);
+}
+
+/* Rating display in dark mode */
+[data-theme="dark"] .text-muted {
+    color: #adb5bd !important;
+}
+
+[data-theme="dark"] .fs-4 {
+    color: var(--text-color);
 }

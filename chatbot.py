@@ -4,10 +4,12 @@ from dotenv import load_dotenv
 import PyPDF2
 import io
 import requests
-from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api import YouTubeTranscriptApi, CouldNotRetrieveTranscript
 import sys
 import time
 import threading
+from bs4 import BeautifulSoup
+import re
 
 # Load environment variables
 load_dotenv()
@@ -187,35 +189,137 @@ def extract_pdf_text(pdf_path):
         return f"Error: {error_msg}"
 
 def extract_webpage_text(url):
-    """Extract text from a webpage."""
+    """Extract text from a webpage using BeautifulSoup for better HTML parsing."""
     try:
-        response = requests.get(url)
-        if response.status_code == 200:
-            return response.text
-        else:
+        print(f"Fetching webpage content from: {url}")
+        
+        # Set a user agent to avoid being blocked
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        
+        response = requests.get(url, headers=headers, timeout=15)
+        if response.status_code != 200:
             return f"Error fetching webpage: HTTP {response.status_code}"
+            
+        # Get content type to check if it's HTML
+        content_type = response.headers.get('Content-Type', '').lower()
+        if 'text/html' not in content_type:
+            return f"URL does not point to HTML content: {content_type}"
+            
+        # Parse HTML
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Remove script and style elements
+        for script in soup(["script", "style", "header", "footer", "nav"]):
+            script.extract()
+            
+        # Get text and clean it
+        text = soup.get_text(separator=' ')
+        
+        # Clean up whitespace
+        text = re.sub(r'\s+', ' ', text)
+        text = text.strip()
+        
+        if not text:
+            return "Error: No text content found on the webpage."
+            
+        print(f"Successfully extracted {len(text)} characters from webpage")
+        return text
     except Exception as e:
+        print(f"Error extracting webpage text: {str(e)}")
         return f"Error extracting webpage text: {str(e)}"
 
 def extract_youtube_transcript(video_id):
-    """Extract transcript from a YouTube video."""
+    """Extract transcript from a YouTube video with better error handling."""
     try:
+        if not video_id:
+            print("No video ID provided for transcript extraction")
+            return "Error: No valid YouTube video ID found in the URL."
+            
+        print(f"Fetching transcript for YouTube video: {video_id}")
+        
         transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
+        if not transcript_list:
+            return "Error: No transcript available for this video (it might be disabled or the video might not have one)."
+            
         transcript = " ".join([item['text'] for item in transcript_list])
+        
+        # Add video ID to the transcript for future reference
+        transcript = f"YouTube Video ID: {video_id}\n\n{transcript}"
+        
+        print(f"Successfully extracted transcript of length {len(transcript)}")
         return transcript
+    except CouldNotRetrieveTranscript as e:
+        error_msg = str(e)
+        print(f"YouTubeTranscriptApi error: {error_msg}")
+        if "subtitles are disabled" in error_msg.lower():
+            return "Error: Cannot retrieve transcript because subtitles are disabled for this video."
+        elif "no transcript found" in error_msg.lower():
+            return "Error: No transcript or subtitles found for this video."
+        else:
+            return f"Error: Could not retrieve transcript. The video may not have one, or an API error occurred: {error_msg}"
     except Exception as e:
-        return f"Error extracting YouTube transcript: {str(e)}"
+        error_msg = str(e)
+        print(f"Error extracting YouTube transcript: {error_msg}")
+        return f"Error extracting YouTube transcript: {error_msg}"
 
 def extract_youtube_id(url):
-    """Extract YouTube video ID from URL."""
-    if 'youtu.be' in url:
-        return url.split('/')[-1].split('?')[0]
-    elif 'youtube.com/watch' in url:
+    """Extract YouTube video ID from URL with improved handling of different formats."""
+    try:
+        import re
         import urllib.parse
-        query = urllib.parse.urlparse(url).query
-        params = urllib.parse.parse_qs(query)
-        return params.get('v', [''])[0]
-    return None
+
+        print(f"Extracting YouTube ID from: {url}")
+        
+        # Handle empty or None URLs
+        if not url:
+            print("URL is empty")
+            return None
+        
+        # First pattern: standard youtube.com/watch?v=ID
+        if 'youtube.com/watch' in url:
+            parsed_url = urllib.parse.urlparse(url)
+            params = urllib.parse.parse_qs(parsed_url.query)
+            video_id = params.get('v', [''])[0]
+            if video_id:
+                print(f"Extracted YouTube ID: {video_id}")
+                return video_id
+        
+        # Second pattern: youtu.be/ID
+        if 'youtu.be/' in url:
+            video_id = url.split('youtu.be/')[-1].split('?')[0].split('&')[0]
+            if video_id:
+                print(f"Extracted YouTube ID: {video_id}")
+                return video_id
+        
+        # Third pattern: youtube.com/embed/ID
+        if 'youtube.com/embed/' in url:
+            video_id = url.split('youtube.com/embed/')[-1].split('?')[0].split('&')[0]
+            if video_id:
+                print(f"Extracted YouTube ID: {video_id}")
+                return video_id
+                
+        # Fourth pattern: youtube.com/v/ID
+        if 'youtube.com/v/' in url:
+            video_id = url.split('youtube.com/v/')[-1].split('?')[0].split('&')[0]
+            if video_id:
+                print(f"Extracted YouTube ID: {video_id}")
+                return video_id
+                
+        # Use regex as a fallback to find video IDs
+        video_id_regex = r'(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})'
+        match = re.search(video_id_regex, url)
+        if match:
+            video_id = match.group(1)
+            print(f"Extracted YouTube ID using regex: {video_id}")
+            return video_id
+            
+        print("Could not extract YouTube ID from URL")
+        return None
+    except Exception as e:
+        print(f"Error extracting YouTube ID: {str(e)}")
+        return None
 
 def get_resource_text(resource_type, content):
     """Get text from different resource types."""
@@ -226,14 +330,19 @@ def get_resource_text(resource_type, content):
         # Web link
         return extract_webpage_text(content)
     elif resource_type == 'youtube':
+        # Check if it's a playlist URL
+        if 'list=' in content:
+            print(f"Playlist URL detected for chatbot: {content}")
+            return "Error: Summaries and quizzes are currently only available for individual YouTube videos, not playlists."
+        
         # YouTube video
         video_id = extract_youtube_id(content)
         if video_id:
             return extract_youtube_transcript(video_id)
         else:
-            return "Could not extract YouTube video ID."
+            return "Error: Could not extract a valid YouTube video ID from the provided URL for chatbot processing."
     else:
-        return "Unsupported resource type."
+        return "Error: Unsupported resource type for chatbot processing."
 
 def chat_with_gemini(prompt, resource_text=None, chat_history=None, timeout=30):
     """Chat with Gemini API."""
