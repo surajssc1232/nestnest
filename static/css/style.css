@@ -1,41 +1,181 @@
 /* Custom styles for NestCircle */
 
+/* Import Martian Mono font */
+@import url('https://fonts.googleapis.com/css2?family=Martian+Mono:wght@300;400;500;600;700&display=swap');
+
+/* Theme variables */
+:root {
+    /* Light theme (default) */
+    --primary-color: #20B2AA; /* Turquoise */
+    --secondary-color: #17807a; /* Darker turquoise */
+    --background-color: #ffffff;
+    --card-bg-color: #ffffff;
+    --text-color: #212529;
+    --text-muted: #6c757d;
+    --border-color: #dee2e6;
+    --header-bg: #f8f9fa;
+    --card-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    --hover-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    --alert-bg: #f8f9fa;
+    --category-bg: #f0f0f0;
+    --category-text: #333333;
+    --list-group-bg: #ffffff;
+    --list-group-hover: #f8f9fa;
+    --input-text: #333333;
+    --input-placeholder: #6c757d;
+}
+
+/* Dark theme */
+[data-theme="dark"] {
+    --primary-color: #20B2AA; /* Turquoise */
+    --secondary-color: #2ed1c9; /* Lighter turquoise for better contrast in dark mode */
+    --background-color: #121212;
+    --card-bg-color: #1e1e1e;
+    --text-color: #f8f9fa;
+    --text-muted: #adb5bd;
+    --border-color: #343a40;
+    --header-bg: #262626;
+    --card-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    --hover-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    --alert-bg: #2d3238;
+    --category-bg: #333333;
+    --category-text: #f0f0f0;
+    --list-group-bg: #1e1e1e;
+    --list-group-hover: #262626;
+    --input-text: #e1e1e1;
+    --input-placeholder: #adb5bd;
+}
+
 /* Apply custom font */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Martian Mono', monospace;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Main container background */
+.container {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+/* Theme switch */
+.theme-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+}
+
+.theme-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 30px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--primary-color);
+}
+
+input:checked + .slider:before {
+    transform: translateX(30px);
+}
+
+.theme-switch-container {
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+}
+
+.theme-switch-container i {
+    margin: 0 5px;
+    color: var(--text-color);
 }
 
 /* Enhance navbar */
 .navbar {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: var(--card-bg-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.navbar-brand, .navbar-nav .nav-link {
+    color: var(--text-color);
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--primary-color);
 }
 
 /* Card styles */
 .card {
     border-radius: 0.5rem;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--card-shadow);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-color: var(--card-bg-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
 }
 
 .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--hover-shadow);
 }
 
 .card-header {
     border-top-left-radius: 0.5rem !important;
     border-top-right-radius: 0.5rem !important;
+    background-color: var(--header-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.card-body {
+    background-color: var(--card-bg-color);
+    color: var(--text-color);
+}
+
+.card-title, .card-text {
+    color: var(--text-color);
 }
 
 /* Footer styles */
 footer {
     margin-top: 2rem;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    border-top: 1px solid var(--border-color);
 }
 
 /* Resource type icons styling */
 .resource-icon {
     font-size: 2rem;
     margin-bottom: 0.5rem;
+    color: var(--primary-color);
 }
 
 /* Button hover effects */
@@ -44,49 +184,77 @@ footer {
 }
 
 .btn-primary {
-    background-color: #4e73df;
-    border-color: #4e73df;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
 }
 
 .btn-primary:hover {
-    background-color: #2e59d9;
-    border-color: #2653d4;
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
     transform: translateY(-2px);
 }
 
 /* Form styling */
+.form-control, .form-select {
+    background-color: var(--card-bg-color);
+    color: var(--input-text);
+    border-color: var(--border-color);
+}
+
 .form-control:focus {
-    border-color: #4e73df;
-    box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(32, 178, 170, 0.25);
+    background-color: var(--card-bg-color);
+    color: var(--input-text);
+}
+
+/* Placeholder text color */
+::placeholder {
+    color: var(--input-placeholder) !important;
+    opacity: 1;
+}
+
+:-ms-input-placeholder {
+    color: var(--input-placeholder) !important;
+}
+
+::-ms-input-placeholder {
+    color: var(--input-placeholder) !important;
 }
 
 /* Dropdown and select styling */
 .form-select {
-    color: #000000 !important; /* Ensures text is black */
+    color: var(--text-color) !important;
 }
 
 .dropdown-item {
-    color: #000000 !important; /* Ensures dropdown menu items are black */
+    color: var(--text-color) !important;
 }
 
 .dropdown-menu {
-    color: #000000 !important; /* Ensures consistent text color */
+    color: var(--text-color) !important;
+    background-color: var(--card-bg-color);
+    border-color: var(--border-color);
 }
 
 select option {
-    color: #212529 !important; /* Ensures dropdown options are black */
+    color: var(--text-color) !important;
+    background-color: var(--card-bg-color);
 }
 
 /* Alert styling */
 .alert {
     border-radius: 0.5rem;
+    background-color: var(--alert-bg);
+    color: var(--text-color);
 }
 
 /* Jumbotron styling */
 .jumbotron {
-    background-color: #f8f9fc;
+    background-color: var(--header-bg);
     border-radius: 0.5rem;
     box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+    color: var(--text-color);
 }
 
 /* Embeds and iframes */
@@ -99,6 +267,7 @@ select option {
 .social-links a {
     margin-right: 0.5rem;
     transition: transform 0.3s;
+    color: var(--primary-color);
 }
 
 .social-links a:hover {
@@ -127,16 +296,81 @@ select option {
 .star-rating label:hover,
 .star-rating label:hover ~ label,
 .star-rating input:checked ~ label {
-    color: #ffb400;
+    color: var(--primary-color);
 }
 
 /* Resource card badges */
 .resource-badge {
     transition: transform 0.3s ease;
+    background-color: var(--primary-color);
 }
 
 .resource-badge:hover {
     transform: scale(1.1);
+}
+
+/* Category badges and buttons */
+.badge {
+    background-color: var(--category-bg);
+    color: var(--category-text);
+}
+
+.btn-outline-secondary, .btn-secondary {
+    background-color: var(--category-bg);
+    color: var(--category-text);
+    border-color: var(--border-color);
+}
+
+.btn-outline-secondary:hover, .btn-secondary:hover {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* Featured categories sections */
+.featured-categories, .resource-categories {
+    background-color: var(--card-bg-color);
+    border-radius: 0.5rem;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border-color);
+}
+
+.featured-categories h4, .resource-categories h4 {
+    color: var(--text-color);
+    margin-bottom: 15px;
+}
+
+.about-section {
+    background-color: var(--card-bg-color);
+    border-radius: 0.5rem;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border-color);
+}
+
+.about-section h4 {
+    color: var(--text-color);
+    margin-bottom: 15px;
+}
+
+/* List Group Styles */
+.list-group-item {
+    background-color: var(--list-group-bg);
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+.list-group-item:hover {
+    background-color: var(--list-group-hover);
+}
+
+.list-group-item-action {
+    color: var(--text-color);
+}
+
+.list-group-item-action:hover {
+    color: var(--primary-color);
 }
 
 /* Chatbot styling */
@@ -147,7 +381,7 @@ select option {
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background-color: #4e73df;
+    background-color: var(--primary-color);
     color: white;
     display: flex;
     justify-content: center;
@@ -160,7 +394,7 @@ select option {
 
 .chatbot-button:hover {
     transform: scale(1.1);
-    background-color: #2e59d9;
+    background-color: var(--secondary-color);
 }
 
 .chatbot-window {
@@ -169,7 +403,7 @@ select option {
     right: 30px;
     width: 350px;
     height: 500px;
-    background-color: white;
+    background-color: var(--card-bg-color);
     border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     z-index: 1000;
@@ -180,6 +414,7 @@ select option {
     opacity: 0;
     visibility: hidden;
     transform: translateY(20px);
+    border: 1px solid var(--border-color);
 }
 
 .chatbot-window.active {
@@ -189,7 +424,7 @@ select option {
 }
 
 .chatbot-header {
-    background-color: #4e73df;
+    background-color: var(--primary-color);
     color: white;
     padding: 15px;
     display: flex;
@@ -213,6 +448,7 @@ select option {
     overflow-y: auto;
     display: flex;
     flex-direction: column;
+    background-color: var(--card-bg-color);
 }
 
 .chat-message {
@@ -230,15 +466,15 @@ select option {
 }
 
 .chat-message.hint-message {
-    background-color: #f8f9fa;
-    border-left: 3px solid #4e73df;
+    background-color: var(--header-bg);
+    border-left: 3px solid var(--primary-color);
     font-style: italic;
-    color: #5a5c69;
+    color: var(--text-muted);
 }
 
 .chat-message.model-info {
     background-color: transparent;
-    color: #6c757d;
+    color: var(--text-muted);
     border-left: none;
     text-align: center;
     padding: 2px;
@@ -253,15 +489,15 @@ select option {
 
 .user-message {
     align-self: flex-end;
-    background-color: #4e73df;
+    background-color: var(--primary-color);
     color: white;
     border-bottom-right-radius: 5px;
 }
 
 .bot-message {
     align-self: flex-start;
-    background-color: #f0f2f5;
-    color: #333;
+    background-color: var(--header-bg);
+    color: var(--text-color);
     border-bottom-left-radius: 5px;
 }
 
@@ -277,19 +513,22 @@ select option {
 .chatbot-input {
     display: flex;
     padding: 10px;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--border-color);
+    background-color: var(--card-bg-color);
 }
 
 .chatbot-input input {
     flex: 1;
     padding: 10px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     border-radius: 20px;
     outline: none;
+    background-color: var(--background-color);
+    color: var(--text-color);
 }
 
 .chatbot-input button {
-    background-color: #4e73df;
+    background-color: var(--primary-color);
     color: white;
     border: none;
     width: 40px;
@@ -301,7 +540,43 @@ select option {
 }
 
 .chatbot-input button:hover {
-    background-color: #2e59d9;
+    background-color: var(--secondary-color);
+}
+
+.chatbot-actions {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--header-bg);
+}
+
+.chatbot-action-btn {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    background-color: var(--primary-color);
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.chatbot-action-btn:hover {
+    background-color: var(--secondary-color);
+}
+
+.chatbot-action-btn i {
+    font-size: 14px;
+}
+
+.chatbot-action-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
 }
 
 .chatbot-loading {
@@ -320,7 +595,7 @@ select option {
     width: 8px;
     height: 8px;
     margin: 0 2px;
-    background-color: #999;
+    background-color: var(--text-muted);
     border-radius: 50%;
     display: inline-block;
     animation: typing 1.4s infinite ease-in-out both;
@@ -341,47 +616,11 @@ select option {
     content: "This is taking longer than usual...";
     margin-left: 10px;
     font-size: 0.8em;
-    color: #6c757d;
+    color: var(--text-muted);
     animation: fadeIn 0.5s ease;
 }
 
 @keyframes typing {
     0%, 80%, 100% { transform: scale(0); }
     40% { transform: scale(1); }
-}
-
-.chatbot-actions {
-    display: flex;
-    gap: 10px;
-    padding: 10px;
-    border-bottom: 1px solid #e0e0e0;
-    background-color: #f8f9fa;
-}
-
-.chatbot-action-btn {
-    flex: 1;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 4px;
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-}
-
-.chatbot-action-btn:hover {
-    background-color: #0056b3;
-}
-
-.chatbot-action-btn i {
-    font-size: 14px;
-}
-
-.chatbot-action-btn:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
 }

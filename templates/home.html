@@ -5,7 +5,7 @@
 {% block content %}
 <div class="row">
     <div class="col-lg-8">
-        <div class="jumbotron p-4 bg-light rounded-3 mb-4">
+        <div class="jumbotron p-4 rounded-3 mb-4" style="background-color: var(--header-bg); color: var(--text-color);">
             <h1 class="display-4">Welcome to NestCircle</h1>
             <p class="lead">A platform for students to share educational resources.</p>
             <hr class="my-4">
@@ -35,16 +35,16 @@
                                     {% endif %}
                                     {{ resource.resource_type|capitalize }}
                                 </span>
-                                <small class="text-muted">{{ resource.date_posted.strftime('%Y-%m-%d') }}</small>
+                                <small style="color: var(--text-muted);">{{ resource.date_posted.strftime('%Y-%m-%d') }}</small>
                             </div>
                             <div class="card-body">
                                 <h5 class="card-title">{{ resource.title }}</h5>
-                                <h6 class="card-subtitle mb-2 text-muted">By {{ resource.author.username }}</h6>
+                                <h6 class="card-subtitle mb-2" style="color: var(--text-muted);">By {{ resource.author.username }}</h6>
                                 <p class="card-text">{{ resource.description|truncate(100) }}</p>
                                 
                                 <div class="d-flex align-items-center mt-2">
                                     <div class="me-2">
-                                        <small class="text-muted">Rating:</small>
+                                        <small style="color: var(--text-muted);">Rating:</small>
                                     </div>
                                     <div>
                                         {% for i in range(5) %}
@@ -58,11 +58,11 @@
                                         {% endfor %}
                                     </div>
                                     <div class="ms-2">
-                                        <small class="text-muted">({{ "%.1f"|format(resource.avg_rating) }})</small>
+                                        <small style="color: var(--text-muted);">({{ "%.1f"|format(resource.avg_rating) }})</small>
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-footer">
+                            <div class="card-footer" style="background-color: var(--header-bg);">
                                 <a href="{{ url_for('resource', resource_id=resource.id) }}" class="btn btn-sm btn-outline-primary">View Details</a>
                             </div>
                         </div>
@@ -77,60 +77,50 @@
     </div>
     
     <div class="col-lg-4">
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">Resource Categories</h5>
-            </div>
-            <div class="list-group list-group-flush">
-                <a href="{{ url_for('search') }}?resource_type=link" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+        <div class="resource-categories mb-4">
+            <h4>Resource Categories</h4>
+            <div class="list-group">
+                <a href="{{ url_for('search') }}?resource_type=link" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" style="background-color: var(--card-bg-color); color: var(--text-color); border-color: var(--border-color);">
                     <span><i class="fas fa-link me-2"></i> Links</span>
-                    <span class="badge bg-primary rounded-pill">{{ resources|selectattr('resource_type', 'equalto', 'link')|list|length }}</span>
+                    <span class="badge rounded-pill" style="background-color: var(--primary-color);">{{ resources|selectattr('resource_type', 'equalto', 'link')|list|length }}</span>
                 </a>
-                <a href="{{ url_for('search') }}?resource_type=pdf" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                <a href="{{ url_for('search') }}?resource_type=pdf" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" style="background-color: var(--card-bg-color); color: var(--text-color); border-color: var(--border-color);">
                     <span><i class="fas fa-file-pdf me-2"></i> PDFs</span>
-                    <span class="badge bg-primary rounded-pill">{{ resources|selectattr('resource_type', 'equalto', 'pdf')|list|length }}</span>
+                    <span class="badge rounded-pill" style="background-color: var(--primary-color);">{{ resources|selectattr('resource_type', 'equalto', 'pdf')|list|length }}</span>
                 </a>
-                <a href="{{ url_for('search') }}?resource_type=youtube" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                <a href="{{ url_for('search') }}?resource_type=youtube" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" style="background-color: var(--card-bg-color); color: var(--text-color); border-color: var(--border-color);">
                     <span><i class="fab fa-youtube me-2"></i> YouTube</span>
-                    <span class="badge bg-primary rounded-pill">{{ resources|selectattr('resource_type', 'equalto', 'youtube')|list|length }}</span>
+                    <span class="badge rounded-pill" style="background-color: var(--primary-color);">{{ resources|selectattr('resource_type', 'equalto', 'youtube')|list|length }}</span>
                 </a>
-                <a href="{{ url_for('categories') }}" class="list-group-item list-group-item-action text-center text-primary">
+                <a href="{{ url_for('categories') }}" class="list-group-item list-group-item-action text-center" style="background-color: var(--card-bg-color); color: var(--primary-color); border-color: var(--border-color);">
                     <i class="fas fa-th-list me-1"></i> View All Categories
                 </a>
             </div>
         </div>
         
         {% if categories %}
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">Featured Categories</h5>
+        <div class="featured-categories mb-4">
+            <h4>Featured Categories</h4>
+            <div class="d-flex flex-wrap gap-2">
+                {% for category in categories[:8] %}
+                    <a href="{{ url_for('category', category_id=category.id) }}" class="badge p-2 text-decoration-none" style="background-color: var(--category-bg); color: var(--category-text);">
+                        {{ category.name }}
+                    </a>
+                {% endfor %}
             </div>
-            <div class="card-body">
-                <div class="d-flex flex-wrap gap-2">
-                    {% for category in categories[:8] %}
-                        <a href="{{ url_for('category', category_id=category.id) }}" class="badge bg-secondary p-2 text-decoration-none">
-                            {{ category.name }}
-                        </a>
-                    {% endfor %}
+            {% if categories|length > 8 %}
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('categories') }}" class="text-decoration-none" style="color: var(--primary-color);">View all categories</a>
                 </div>
-                {% if categories|length > 8 %}
-                    <div class="text-center mt-3">
-                        <a href="{{ url_for('categories') }}" class="text-decoration-none">View all categories</a>
-                    </div>
-                {% endif %}
-            </div>
+            {% endif %}
         </div>
         {% endif %}
         
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">About NestCircle</h5>
-            </div>
-            <div class="card-body">
-                <p>NestCircle is a platform designed for students to share educational resources with each other.</p>
-                <p>Our goal is to create a collaborative space where knowledge can be easily shared and accessed.</p>
-                <p>Join our community today and start sharing your favorite learning resources!</p>
-            </div>
+        <div class="about-section">
+            <h4>About NestCircle</h4>
+            <p>NestCircle is a platform designed for students to share educational resources with each other.</p>
+            <p>Our goal is to create a collaborative space where knowledge can be easily shared and accessed.</p>
+            <p>Join our community today and start sharing your favorite learning resources!</p>
         </div>
     </div>
 </div>
